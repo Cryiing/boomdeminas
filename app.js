@@ -205,7 +205,25 @@ const productionMessage =
     "productionMessage"
   );
 
+const productionMovementType =
+  document.getElementById(
+    "productionMovementType"
+  );
 
+const productionBoxesGroup =
+  document.getElementById(
+    "productionBoxesGroup"
+  );
+
+const productionUnitsGroup =
+  document.getElementById(
+    "productionUnitsGroup"
+  );
+
+const productionUnits =
+  document.getElementById(
+    "productionUnits"
+  );
 // ======================================================
 // SAÍDA
 // ======================================================
