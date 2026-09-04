@@ -654,17 +654,48 @@
 
 
           <label>
-            Caixas fechadas
+  Tipo de entrada
 
-            <input
-              id="boxes"
-              type="number"
-              min="1"
-              step="1"
-              value="1"
-              required
-            >
-          </label>
+  <select id="productionMovementType">
+    <option value="caixas">
+      📦 Caixas fechadas
+    </option>
+
+    <option value="unidades">
+      🔢 Unidades avulsas
+    </option>
+  </select>
+</label>
+
+
+<label id="productionBoxesGroup">
+  Caixas fechadas
+
+  <input
+    id="boxes"
+    type="number"
+    min="1"
+    step="1"
+    value="1"
+    required
+  >
+</label>
+
+
+<label
+  id="productionUnitsGroup"
+  style="display: none;"
+>
+  Unidades avulsas
+
+  <input
+    id="productionUnits"
+    type="number"
+    min="1"
+    step="1"
+    value="1"
+  >
+</label>
 
 
           <div class="preview">
