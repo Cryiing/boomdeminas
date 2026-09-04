@@ -3289,7 +3289,6 @@ logoutBtn.addEventListener(
   }
 );
 
-
 // ======================================================
 // REGISTRAR PRODUÇÃO
 // ======================================================
@@ -3303,11 +3302,6 @@ productionForm.addEventListener(
     const product =
       getSelectedProductionProduct();
 
-    const boxes =
-      Number(
-        boxesInput.value
-      );
-
     if (!product) {
 
       showMessage(
@@ -3319,20 +3313,56 @@ productionForm.addEventListener(
       return;
     }
 
+    let quantidade;
+
     if (
-      !Number.isInteger(
-        boxes
-      ) ||
-      boxes <= 0
+      productionMovementType.value ===
+      "unidades"
     ) {
 
-      showMessage(
-        productionMessage,
-        "Informe uma quantidade válida de caixas.",
-        true
-      );
+      quantidade =
+        Number(
+          productionUnits.value
+        );
 
-      return;
+      if (
+        !Number.isInteger(
+          quantidade
+        ) ||
+        quantidade <= 0
+      ) {
+
+        showMessage(
+          productionMessage,
+          "Informe uma quantidade válida de unidades.",
+          true
+        );
+
+        return;
+      }
+
+    } else {
+
+      quantidade =
+        Number(
+          boxesInput.value
+        );
+
+      if (
+        !Number.isInteger(
+          quantidade
+        ) ||
+        quantidade <= 0
+      ) {
+
+        showMessage(
+          productionMessage,
+          "Informe uma quantidade válida de caixas.",
+          true
+        );
+
+        return;
+      }
     }
 
     showMessage(
@@ -3340,19 +3370,45 @@ productionForm.addEventListener(
       "Registrando produção..."
     );
 
-    const {
-      error
-    } =
-      await supabaseClient.rpc(
-        "registrar_deposito",
-        {
-          p_produto_id:
-            product.id,
+    let error;
 
-          p_caixas:
-            boxes
-        }
-      );
+    if (
+      productionMovementType.value ===
+      "unidades"
+    ) {
+
+      const result =
+        await supabaseClient.rpc(
+          "registrar_deposito_unidades",
+          {
+            p_produto_id:
+              product.id,
+
+            p_unidades:
+              quantidade
+          }
+        );
+
+      error =
+        result.error;
+
+    } else {
+
+      const result =
+        await supabaseClient.rpc(
+          "registrar_deposito",
+          {
+            p_produto_id:
+              product.id,
+
+            p_caixas:
+              quantidade
+          }
+        );
+
+      error =
+        result.error;
+    }
 
     if (error) {
 
