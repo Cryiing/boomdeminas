@@ -249,6 +249,25 @@ const exitBoxes =
   document.getElementById(
     "exitBoxes"
   );
+const exitMovementType =
+  document.getElementById(
+    "exitMovementType"
+  );
+
+const exitBoxesGroup =
+  document.getElementById(
+    "exitBoxesGroup"
+  );
+
+const exitUnitsGroup =
+  document.getElementById(
+    "exitUnitsGroup"
+  );
+
+const exitUnits =
+  document.getElementById(
+    "exitUnits"
+  );
 
 const exitReasonInput =
   document.getElementById(
