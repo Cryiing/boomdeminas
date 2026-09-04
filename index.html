@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Estoque | Pão de Queijo</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Aplica o tema salvo antes de renderizar a página, evitando o "flash" de tela clara -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+</head>
+
+<body>
+
+<main class="container">
+
+  <!-- ==================================================
+       CABEÇALHO
+       ================================================== -->
+
+  <header class="header">
+
+    <div>
+      <span class="eyebrow">
+        CONTROLE DE ESTOQUE
+      </span>
+
+      <h1>
+        Estoque
+      </h1>
+
+      <p>
+        Controle de produção e movimentação
+      </p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        id="themeToggle"
+        class="theme-toggle"
+        type="button"
+        aria-label="Alternar modo claro/escuro"
+      >
+        <span id="themeToggleIcon">🌙</span>
+        <span id="themeToggleLabel">Escuro</span>
+      </button>
+
+      <span
+        id="userRole"
+        class="user-role hidden"
+      ></span>
+
+      <button
+        id="logoutBtn"
+        class="secondary hidden"
+        type="button"
+      >
+        Sair
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ==================================================
+       LOGIN
+       ================================================== -->
+
+  <section
+    id="loginCard"
+    class="card"
+  >
+
+    <h2>
+      Entrar
+    </h2>
+
+    <p class="muted">
+      Use o usuário criado no Supabase Auth.
+    </p>
+
+    <form id="loginForm">
+
+      <label>
+        E-mail
+
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          required
+        >
+      </label>
+
+      <label>
+        Senha
+
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+      </label>
+
+      <button type="submit">
+        Entrar
+      </button>
+
+    </form>
+
+    <p
+      id="loginMessage"
+      class="message"
+    ></p>
+
+  </section>
+
+
+  <!-- ==================================================
+       APLICATIVO
+       ================================================== -->
+
+  <section
+    id="app"
+    class="hidden"
+  >
+
+    <!-- ==================================================
+         NAVEGAÇÃO POR ABAS
+         ================================================== -->
+
+    <nav class="tabs">
+
+      <button
+        class="tab-btn active"
+        type="button"
+        data-tab="tabProducao"
+      >
+        📦 Produção / Saída
+      </button>
+
+      <button
+        class="tab-btn"
+        type="button"
+        data-tab="tabEstoque"
+      >
+        📊 Estoque
+      </button>
+
+      <button
+        class="tab-btn"
+        type="button"
+        data-tab="tabHistorico"
+      >
+        🕓 Histórico
+      </button>
+
+      <button
+        id="tabBtnAdmin"
+        class="tab-btn hidden"
+        type="button"
+        data-tab="tabAdmin"
+      >
+        👑 Admin
+      </button>
+
+    </nav>
+
+
+    <!-- ==================================================
+         ADMINISTRAÇÃO
+         ================================================== -->
+
+    <div
+      id="tabAdmin"
+      class="tab-panel hidden"
+    >
+
+    <section
+      id="adminPanel"
+      class="card hidden"
+    >
+
+      <div class="section-title">
+
+        <div>
+
+          <span class="eyebrow">
+            ADMINISTRAÇÃO
+          </span>
+
+          <h2>
+            Painel administrativo
+          </h2>
+
+          <p class="muted">
+            Gerencie usuários e produtos do estoque.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           USUÁRIOS
+           ================================================== -->
+
+      <div class="admin-create-user">
+
+        <div class="section-title">
+
+          <div>
+
+            <span class="eyebrow">
+              USUÁRIOS
+            </span>
+
+            <h3>
+              Criar usuário
+            </h3>
+
+            <p class="muted">
+              Cadastre um novo funcionário ou administrador.
+            </p>
+
+          </div>
+
+          <button
+            id="refreshUsersBtn"
+            class="secondary"
+            type="button"
+          >
+            Atualizar
+          </button>
+
+        </div>
+
+
+        <form id="createUserForm">
+
+          <label>
+            Nome
+
+            <input
+              id="newUserName"
+              type="text"
+              placeholder="Nome do funcionário"
+              required
+            >
+          </label>
+
+          <label>
+            E-mail
+
+            <input
+              id="newUserEmail"
+              type="email"
+              placeholder="email@exemplo.com"
+              required
+            >
+          </label>
+
+          <label>
+            Senha
+
+            <input
+              id="newUserPassword"
+              type="password"
+              minlength="6"
+              placeholder="Mínimo 6 caracteres"
+              required
+            >
+          </label>
+
+          <label>
+            Cargo
+
+            <select id="newUserRole">
+
+              <option value="funcionario">
+                👷 Funcionário
+              </option>
+
+              <option value="admin">
+                👑 Administrador
+              </option>
+
+            </select>
+          </label>
+
+          <button type="submit">
+            Criar usuário
+          </button>
+
+        </form>
+
+        <p
+          id="createUserMessage"
+          class="message"
+        ></p>
+
+      </div>
+
+
+      <!-- TABELA DE USUÁRIOS -->
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Cargo</th>
+              <th>Ação</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="usersBody"></tbody>
+
+        </table>
+
+      </div>
+
+      <p
+        id="usersMessage"
+        class="message"
+      ></p>
+
+
+      <!-- ==================================================
+           CADASTRO DE PRODUTOS
+           ================================================== -->
+
+      <div class="admin-create-user">
+
+        <div class="section-title">
+
+          <div>
+
+            <span class="eyebrow">
+              CATÁLOGO
+            </span>
+
+            <h3>
+              Adicionar produto
+            </h3>
+
+            <p class="muted">
+              Cadastre novas variações sem alterar o código.
+            </p>
+
+          </div>
+
+          <button
+            id="refreshProductsBtn"
+            class="secondary"
+            type="button"
+          >
+            Atualizar
+          </button>
+
+        </div>
+
+
+        <form id="createProductForm">
+
+          <label>
+            Tipo
+
+            <select
+              id="newProductType"
+              required
+            >
+
+              <option value="">
+                Selecione...
+              </option>
+
+              <option value="tradicional">
+                Tradicional
+              </option>
+
+              <option value="recheado">
+                Recheado
+              </option>
+
+              <option value="empanado">
+                Empanado / Gourmet
+              </option>
+
+              <option value="palitinho">
+                Palitinho
+              </option>
+
+              <option value="palitao">
+                Palitão
+              </option>
+
+              <option value="chipa">
+                Chipa
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <!-- APARECE SOMENTE PARA RECHEADOS -->
+
+          <label
+            id="newProductFlavorGroup"
+            class="hidden"
+          >
+            Sabor
+
+            <input
+              id="newProductFlavor"
+              type="text"
+              placeholder="Ex.: Catupiry"
+            >
+          </label>
+
+
+          <!-- APARECE PARA PRODUTOS NORMAIS -->
+
+          <div
+            id="newProductNormalFields"
+            class="hidden"
+          >
+
+            <label>
+              Gramatura
+
+              <input
+                id="newProductGrams"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Ex.: 25"
+              >
+            </label>
+
+
+            <label>
+              Peso
+
+              <select id="newProductWeight">
+
+                <option value="">
+                  Selecione...
+                </option>
+
+                <option value="1">
+                  1 kg
+                </option>
+
+                <option value="2">
+                  2 kg
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <label>
+            Unidades por caixa
+
+            <input
+              id="newProductUnits"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="Ex.: 25"
+              required
+            >
+          </label>
+
+
+          <button type="submit">
+            ➕ Adicionar produto
+          </button>
+
+        </form>
+
+
+        <p
+          id="productMessage"
+          class="message"
+        ></p>
+
+      </div>
+
+
+      <!-- ==================================================
+           CATÁLOGO ADMIN
+           ================================================== -->
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Tipo</th>
+              <th>Produto</th>
+              <th>Gramatura</th>
+              <th>Peso</th>
+              <th>Un./caixa</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="productsBody"></tbody>
+
+        </table>
+
+      </div>
+
+
+      <p
+        id="productsMessage"
+        class="message"
+      ></p>
+
+    </section>
+
+    </div>
+    <!-- fim: tabAdmin -->
+
+
+    <!-- ==================================================
+         PRODUÇÃO E SAÍDA
+         ================================================== -->
+
+    <div
+      id="tabProducao"
+      class="tab-panel"
+    >
+
+    <div class="grid">
+
+
+      <!-- ==================================================
+           ENTRADA / PRODUÇÃO
+           ================================================== -->
+
+      <article class="card">
+
+        <h2>
+          Registrar produção
+        </h2>
+
+        <p class="muted">
+          Selecione a variação e informe a quantidade de caixas.
+        </p>
+
+
+        <form id="productionForm">
+
+
+          <label>
+            Tipo
+
+            <select
+              id="productionType"
+              required
+            >
+
+              <option value="">
+                Selecione...
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <!-- RECHEADOS -->
+
+          <label
+            id="productionFlavorGroup"
+            class="hidden"
+          >
+            Sabor
+
+            <select id="productionFlavor">
+
+              <option value="">
+                Selecione...
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <!-- PRODUTOS NORMAIS -->
+
+          <div
+            id="productionNormalFields"
+            class="hidden"
+          >
+
+            <label>
+              Gramatura
+
+              <select id="productionGrams">
+
+                <option value="">
+                  Selecione...
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Peso
+
+              <select id="productionWeight">
+
+                <option value="">
+                  Selecione...
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <label>
+            Caixas fechadas
+
+            <input
+              id="boxes"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+              required
+            >
+          </label>
+
+
+          <div class="preview">
+
+            <span>
+              Produto selecionado
+            </span>
+
+            <strong id="productionProductPreview">
+              Selecione o produto
+            </strong>
+
+          </div>
+
+
+          <button type="submit">
+            ➕ Registrar produção
+          </button>
+
+        </form>
+
+
+        <p
+          id="productionMessage"
+          class="message"
+        ></p>
+
+      </article>
+
+
+      <!-- ==================================================
+           SAÍDA
+           ================================================== -->
+
+      <article class="card">
+
+        <h2>
+          Registrar saída
+        </h2>
+
+        <p class="muted">
+          Selecione a variação e retire caixas do estoque.
+        </p>
+
+
+        <form id="exitForm">
+
+
+          <label>
+            Tipo
+
+            <select
+              id="exitType"
+              required
+            >
+
+              <option value="">
+                Selecione...
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <label
+            id="exitFlavorGroup"
+            class="hidden"
+          >
+            Sabor
+
+            <select id="exitFlavor">
+
+              <option value="">
+                Selecione...
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <div
+            id="exitNormalFields"
+            class="hidden"
+          >
+
+            <label>
+              Gramatura
+
+              <select id="exitGrams">
+
+                <option value="">
+                  Selecione...
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label>
+              Peso
+
+              <select id="exitWeight">
+
+                <option value="">
+                  Selecione...
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <label>
+            Caixas
+
+            <input
+              id="exitBoxes"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+              required
+            >
+          </label>
+
+
+          <label>
+            Motivo
+
+            <select id="exitReason">
+
+              <option value="Venda">
+                Venda
+              </option>
+
+              <option value="Uso interno">
+                Uso interno
+              </option>
+
+              <option value="Perda">
+                Perda
+              </option>
+
+              <option value="Outro">
+                Outro
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <div class="preview">
+
+            <span>
+              Produto selecionado
+            </span>
+
+            <strong id="exitProductPreview">
+              Selecione o produto
+            </strong>
+
+          </div>
+
+
+          <div class="preview">
+
+            <span>
+              Estoque atual
+            </span>
+
+            <strong id="stockAfterExit">
+              -- unidades
+            </strong>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="danger"
+          >
+            ➖ Registrar saída
+          </button>
+
+        </form>
+
+
+        <p
+          id="exitMessage"
+          class="message"
+        ></p>
+
+      </article>
+
+    </div>
+    <!-- fim: .grid (produção/saída) -->
+
+    </div>
+    <!-- fim: tabProducao -->
+
+
+    <!-- ==================================================
+         ESTOQUE
+         ================================================== -->
+
+    <div
+      id="tabEstoque"
+      class="tab-panel hidden"
+    >
+
+      <!-- ESTOQUE TOTAL -->
+
+      <article class="stock-card">
+
+        <div>
+
+          <span class="eyebrow">
+            ESTOQUE TOTAL
+          </span>
+
+          <h2 id="stockTotal">
+            0
+          </h2>
+
+          <p>
+            unidades
+          </p>
+
+        </div>
+
+        <div class="box-icon">
+          📦
+        </div>
+
+      </article>
+
+
+    <!-- ==================================================
+         ESTOQUE POR PRODUTO
+         ================================================== -->
+
+    <section class="card">
+
+      <div class="section-title">
+
+        <div>
+
+          <h2>
+            Estoque por produto
+          </h2>
+
+          <p class="muted">
+            Quantidade disponível de cada variação.
+          </p>
+
+        </div>
+
+        <button
+          id="refreshBtn"
+          class="secondary"
+          type="button"
+        >
+          Atualizar
+        </button>
+
+      </div>
+
+
+      <!-- PESQUISA DE PRODUTO -->
+
+      <div class="product-search">
+
+        <label for="stockSearch">
+          🔎 Pesquisar produto
+        </label>
+
+        <input
+          id="stockSearch"
+          type="search"
+          placeholder="Digite o nome, sabor, tipo ou gramatura..."
+          autocomplete="off"
+        >
+
+        <p
+          id="stockSearchMessage"
+          class="muted"
+        ></p>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Tipo</th>
+              <th>Produto</th>
+              <th>Gramatura</th>
+              <th>Peso</th>
+              <th>Estoque</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="stockBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+    </div>
+    <!-- fim: tabEstoque -->
+
+
+    <!-- ==================================================
+         HISTÓRICO
+         ================================================== -->
+
+    <div
+      id="tabHistorico"
+      class="tab-panel hidden"
+    >
+
+    <section class="card">
+
+      <div class="section-title">
+
+        <div>
+
+          <h2>
+            Histórico
+          </h2>
+
+          <p class="muted">
+            Últimas entradas e saídas registradas.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Data</th>
+              <th>Responsável</th>
+              <th>Tipo</th>
+              <th>Quantidade</th>
+              <th>Produto</th>
+              <th>Detalhes</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="historyBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+    </div>
+    <!-- fim: tabHistorico -->
+
+  </section>
+
+
+  <!-- ==================================================
+       RODAPÉ
+       ================================================== -->
+
+  <footer>
+
+    <span>
+      Controle de estoque — Pão de queijo
+    </span>
+
+  </footer>
+
+</main>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- NOSSO JAVASCRIPT -->
+
+<script src="app.js"></script>
+
+</body>
+</html>
