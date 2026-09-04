@@ -3470,11 +3470,6 @@ exitForm.addEventListener(
     const product =
       getSelectedExitProduct();
 
-    const boxes =
-      Number(
-        exitBoxes.value
-      );
-
     const reason =
       exitReasonInput.value;
 
@@ -3489,20 +3484,56 @@ exitForm.addEventListener(
       return;
     }
 
+    let quantidade;
+
     if (
-      !Number.isInteger(
-        boxes
-      ) ||
-      boxes <= 0
+      exitMovementType.value ===
+      "unidades"
     ) {
 
-      showMessage(
-        exitMessage,
-        "Informe uma quantidade válida de caixas.",
-        true
-      );
+      quantidade =
+        Number(
+          exitUnits.value
+        );
 
-      return;
+      if (
+        !Number.isInteger(
+          quantidade
+        ) ||
+        quantidade <= 0
+      ) {
+
+        showMessage(
+          exitMessage,
+          "Informe uma quantidade válida de unidades.",
+          true
+        );
+
+        return;
+      }
+
+    } else {
+
+      quantidade =
+        Number(
+          exitBoxes.value
+        );
+
+      if (
+        !Number.isInteger(
+          quantidade
+        ) ||
+        quantidade <= 0
+      ) {
+
+        showMessage(
+          exitMessage,
+          "Informe uma quantidade válida de caixas.",
+          true
+        );
+
+        return;
+      }
     }
 
     showMessage(
@@ -3510,22 +3541,51 @@ exitForm.addEventListener(
       "Registrando saída..."
     );
 
-    const {
-      error
-    } =
-      await supabaseClient.rpc(
-        "registrar_retirada",
-        {
-          p_produto_id:
-            product.id,
+    let error;
 
-          p_caixas:
-            boxes,
+    if (
+      exitMovementType.value ===
+      "unidades"
+    ) {
 
-          p_motivo:
-            reason
-        }
-      );
+      const result =
+        await supabaseClient.rpc(
+          "registrar_retirada_unidades",
+          {
+            p_produto_id:
+              product.id,
+
+            p_unidades:
+              quantidade,
+
+            p_motivo:
+              reason
+          }
+        );
+
+      error =
+        result.error;
+
+    } else {
+
+      const result =
+        await supabaseClient.rpc(
+          "registrar_retirada",
+          {
+            p_produto_id:
+              product.id,
+
+            p_caixas:
+              quantidade,
+
+            p_motivo:
+              reason
+          }
+        );
+
+      error =
+        result.error;
+    }
 
     if (error) {
 
