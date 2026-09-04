@@ -781,19 +781,49 @@
 
           </div>
 
+<label>
+  Tipo de saída
 
-          <label>
-            Caixas
+  <select id="exitMovementType">
+    <option value="caixas">
+      📦 Caixas fechadas
+    </option>
 
-            <input
-              id="exitBoxes"
-              type="number"
-              min="1"
-              step="1"
-              value="1"
-              required
-            >
-          </label>
+    <option value="unidades">
+      🔢 Unidades avulsas
+    </option>
+  </select>
+</label>
+
+
+<label id="exitBoxesGroup">
+  Caixas
+
+  <input
+    id="exitBoxes"
+    type="number"
+    min="1"
+    step="1"
+    value="1"
+    required
+  >
+</label>
+
+
+<label
+  id="exitUnitsGroup"
+  style="display: none;"
+>
+  Unidades avulsas
+
+  <input
+    id="exitUnits"
+    type="number"
+    min="1"
+    step="1"
+    value="1"
+  >
+</label>
 
 
           <label>
