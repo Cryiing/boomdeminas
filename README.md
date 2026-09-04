@@ -1,4 +1,4 @@
-# Estoque — Pão de Queijo
+# Estoque — Pão de Queij
 
 Primeira versão do sistema para registrar produção do Pão de Queijo de Requeijão.
 
