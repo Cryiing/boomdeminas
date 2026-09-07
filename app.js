@@ -1868,41 +1868,35 @@ function formatExitDetails(
 // PRODUTO DO HISTÓRICO
 // ======================================================
 
-function formatHistoryProduct(
-  item
-) {
+function formatHistoryProduct(item) {
 
-  if (
-    !item.tipo
-  ) {
-
+  if (!item || !item.tipo) {
     return "Produto antigo";
   }
 
-  if (
-    item.tipo ===
-    "recheado"
-  ) {
+  const tipo = String(item.tipo).trim();
 
-    return (
-      `Recheado — ${
-        item.sabor || "-"
-      }`
-    );
+  if (tipo.toLowerCase() === "recheado") {
+
+    if (item.sabor) {
+      return `Pão de Queijo Recheado - ${item.sabor}`;
+    }
+
+    return "Pão de Queijo Recheado";
   }
 
-  return (
-    `${
-      TYPE_NAMES[item.tipo] ||
-      item.tipo
-    } — ${
-      item.gramas || "-"
-    }g — ${
-      item.peso_kg || "-"
-    }kg`
-  );
-}
+  let produto = `Pão de Queijo ${tipo}`;
 
+  if (item.gramas) {
+    produto += ` - ${item.gramas}g`;
+  }
+
+  if (item.peso_kg) {
+    produto += ` - ${item.peso_kg}kg`;
+  }
+
+  return produto;
+}
 
 // ======================================================
 // LISTAR USUÁRIOS
