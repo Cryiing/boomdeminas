@@ -565,7 +565,10 @@ async function loadUserProfile() {
       "4 - TEXTO DO CARGO NA TELA:",
       userRole.textContent
     );
-
+clearProductionArea.classList.remove(
+    "hidden"
+  ); 
+    
     console.log(
       "5 - ADMIN PANEL ESCONDIDO?",
       adminPanel.classList.contains(
