@@ -219,6 +219,20 @@ const productionUnits =
   document.getElementById(
     "productionUnits"
   );
+const clearProductionArea =
+  document.getElementById(
+    "clearProductionArea"
+  );
+
+const clearProductionBtn =
+  document.getElementById(
+    "clearProductionBtn"
+  );
+
+const clearProductionMessage =
+  document.getElementById(
+    "clearProductionMessage"
+  );
 // ======================================================
 // SAÍDA
 // ======================================================
