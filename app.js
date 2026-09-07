@@ -588,8 +588,11 @@ clearProductionArea.classList.remove(
     tabBtnAdmin.classList.add(
       "hidden"
     );
-  }
-
+  
+clearProductionArea.classList.add(
+  "hidden"
+);
+   }
   return true;
 }
 
@@ -3225,7 +3228,72 @@ async function editProduct(
     refreshAdminProducts()
   ]);
 }
+// ======================================================
+// ADMIN — LIMPAR HISTÓRICO DE PRODUÇÃO
+// ======================================================
 
+async function clearProductionHistory() {
+
+  if (!isAdmin()) {
+
+    showMessage(
+      clearProductionMessage,
+      "Você não tem permissão.",
+      true
+    );
+
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "⚠️ ATENÇÃO!\n\n" +
+      "Isso irá apagar TODO o histórico de PRODUÇÃO.\n\n" +
+      "O estoque NÃO será alterado.\n" +
+      "O histórico de SAÍDAS NÃO será alterado.\n\n" +
+      "Deseja realmente continuar?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  showMessage(
+    clearProductionMessage,
+    "Limpando histórico..."
+  );
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "limpar_historico_producoes"
+    );
+
+  if (error) {
+
+    console.error(
+      "Erro ao limpar histórico de produção:",
+      error
+    );
+
+    showMessage(
+      clearProductionMessage,
+      error.message,
+      true
+    );
+
+    return;
+  }
+
+  showMessage(
+    clearProductionMessage,
+    `${data || 0} produção(ões) apagada(s) com sucesso.`
+  );
+
+  await refreshHistory();
+}
 
 // ======================================================
 // LOGIN
@@ -3833,7 +3901,10 @@ createUserForm.addEventListener(
 // ======================================================
 // EVENTOS DOS PRODUTOS
 // ======================================================
-
+clearProductionBtn.addEventListener(
+  "click",
+  clearProductionHistory
+);
 productionType.addEventListener(
   "change",
   updateProductionFields
