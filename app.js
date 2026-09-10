@@ -2771,17 +2771,31 @@ const todayProductions =
     const raw =
       item.raw || {};
 
-     const pesoKg =
-  raw.tipo === "recheado"
-    ? 1
-    : Number(raw.peso_kg || 0);
+   const pesoKg =
+  Number(raw.peso_kg || 0);
 
 const caixas =
-  Number(
-    raw.caixas || 0
-  );
+  Number(raw.caixas || 0);
 
-if (pesoKg > 0 && caixas > 0) {
+const unidadesAvulsas =
+  Number(raw.unidades_avulsas || 0);
+
+const tipo =
+  String(raw.tipo || "").toLowerCase();
+
+if (tipo === "recheado") {
+
+  // Cada unidade de Recheado representa 1 pacote de 1 kg.
+  totalKg +=
+    caixas * 1;
+
+  totalKg +=
+    unidadesAvulsas * 1;
+
+} else if (pesoKg > 0) {
+
+  // Produtos normais: cada caixa/pacote
+  // vale o peso definido (1 kg ou 2 kg).
   totalKg +=
     pesoKg * caixas;
 }
