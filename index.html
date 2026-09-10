@@ -482,17 +482,45 @@
 
 
           <label>
-            Unidades por caixa
+  Unidades por caixa
+  <input
+    id="newProductUnits"
+    type="number"
+    min="1"
+    step="1"
+    placeholder="Ex.: 25"
+    required
+  >
+</label>
 
-            <input
-              id="newProductUnits"
-              type="number"
-              min="1"
-              step="1"
-              placeholder="Ex.: 25"
-              required
-            >
-          </label>
+
+<label>
+  É para revenda?
+
+  <select id="newProductIsRevenda">
+    <option value="false">
+      Não
+    </option>
+
+    <option value="true">
+      Sim
+    </option>
+  </select>
+</label>
+
+
+<label
+  id="newProductRevendedorGroup"
+  class="hidden"
+>
+  Nome do revendedor
+
+  <input
+    id="newProductRevendedor"
+    type="text"
+    placeholder="Ex.: João"
+  >
+</label>
 
 
           <button type="submit">
