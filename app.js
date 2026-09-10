@@ -2771,8 +2771,6 @@ const todayProductions =
     const raw =
       item.raw || {};
 
-    // resto do código...
-
      const gramas =
   Number(
     raw.gramas || 0
