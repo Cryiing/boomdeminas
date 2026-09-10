@@ -1219,7 +1219,9 @@ function getSelectedProductionProduct() {
   if (type === "recheado") {
 
     const productId =
-      Number(productionFlavor.value);
+      Number(
+        productionFlavor.value
+      );
 
     if (!productId) {
       return null;
@@ -1228,27 +1230,26 @@ function getSelectedProductionProduct() {
     return (
       products.find(
         product =>
-          Number(product.id) === productId
+          Number(product.id) ===
+          productId
       ) || null
     );
   }
 
-  const grams =
-    Number(productionGrams.value);
+  const productId =
+    Number(
+      productionWeight.value
+    );
 
-  const weight =
-    Number(productionWeight.value);
-
-  if (!grams || !weight) {
+  if (!productId) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        product.tipo === type &&
-        Number(product.gramas) === grams &&
-        Number(product.peso_kg) === weight
+        Number(product.id) ===
+        productId
     ) || null
   );
 }
