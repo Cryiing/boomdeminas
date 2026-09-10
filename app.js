@@ -1076,36 +1076,67 @@ function populateFlavorSelect(
   select.innerHTML =
     `<option value="">Selecione...</option>`;
 
-  const flavors =
+  const flavorProducts =
     products
       .filter(
         product =>
           product.tipo === type
       )
-      .map(
+      .filter(
         product =>
           product.sabor
       )
-      .filter(Boolean)
-      .sort();
+      .sort(
+        (a, b) => {
 
-  flavors.forEach(
-    flavor => {
+          const nameA =
+            a.sabor +
+            (
+              a.is_revenda
+                ? ` — ${a.revendedor || ""}`
+                : ""
+            );
+
+          const nameB =
+            b.sabor +
+            (
+              b.is_revenda
+                ? ` — ${b.revendedor || ""}`
+                : ""
+            );
+
+          return nameA.localeCompare(
+            nameB,
+            "pt-BR"
+          );
+
+        }
+      );
+
+  flavorProducts.forEach(
+    product => {
 
       const option =
         document.createElement(
           "option"
         );
 
+      // Guarda o ID real do produto
       option.value =
-        flavor;
+        product.id;
 
       option.textContent =
-        flavor;
+        product.sabor +
+        (
+          product.is_revenda
+            ? ` — ${product.revendedor || ""}`
+            : ""
+        );
 
       select.appendChild(
         option
       );
+
     }
   );
 }
@@ -1186,18 +1217,20 @@ function getSelectedProductionProduct() {
     type === "recheado"
   ) {
 
-    const flavor =
-      productionFlavor.value;
+    const productId =
+      Number(
+        productionFlavor.value
+      );
 
-    if (!flavor) {
+    if (!productId) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          product.tipo === "recheado" &&
-          product.sabor === flavor
+          Number(product.id) ===
+          productId
       ) || null
     );
   }
@@ -1247,18 +1280,20 @@ function getSelectedExitProduct() {
     type === "recheado"
   ) {
 
-    const flavor =
-      exitFlavor.value;
+    const productId =
+      Number(
+        exitFlavor.value
+      );
 
-    if (!flavor) {
+    if (!productId) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          product.tipo === "recheado" &&
-          product.sabor === flavor
+          Number(product.id) ===
+          productId
       ) || null
     );
   }
@@ -1289,7 +1324,6 @@ function getSelectedExitProduct() {
     ) || null
   );
 }
-
 
 // ======================================================
 // PREVIEW PRODUÇÃO
