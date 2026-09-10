@@ -2763,14 +2763,63 @@ const todayProductions =
 console.log("DADOS DO ITEM:", item);
 console.log("RAW:", raw);
     
-   const pesoKg =
-  Number(raw.peso_kg || 1);
-
-const caixas =
+   const caixas =
   Number(raw.caixas || 0);
 
 const unidadesAvulsas =
   Number(raw.unidades_avulsas || 0);
+
+const quantidadeTotal =
+  Number(item.quantity || 0);
+
+const isRecheado =
+  raw.tipo === "recheado" ||
+  String(item.product || "")
+    .toLowerCase()
+    .includes("recheado");
+
+const pesoKg =
+  isRecheado
+    ? 1
+    : Number(raw.peso_kg || 1);
+
+let kgCaixas = 0;
+
+if (caixas > 0) {
+
+  if (isRecheado) {
+
+    // Descobre quantos recheados existem em cada caixa.
+    const unidadesPorCaixa =
+      Math.round(
+        (quantidadeTotal - unidadesAvulsas) /
+        caixas
+      );
+
+    // Cada recheado vale 1 kg.
+    kgCaixas =
+      caixas *
+      unidadesPorCaixa;
+
+  } else {
+
+    // Nos demais produtos, a caixa já possui
+    // seu peso definido (1kg, 2kg, etc.).
+    kgCaixas =
+      caixas *
+      pesoKg;
+
+  }
+
+}
+
+const kgAvulsas =
+  unidadesAvulsas *
+  pesoKg;
+
+totalKg +=
+  kgCaixas +
+  kgAvulsas;
 
 totalKg +=
   pesoKg *
