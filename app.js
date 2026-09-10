@@ -1076,21 +1076,42 @@ function populateFlavorSelect(
   select.innerHTML =
     `<option value="">Selecione...</option>`;
 
-  const flavors =
+  const flavorProducts =
     products
       .filter(
         product =>
-          product.tipo === type
-      )
-      .map(
-        product =>
+          product.tipo === type &&
           product.sabor
       )
-      .filter(Boolean)
-      .sort();
+      .sort(
+        (a, b) => {
 
-  flavors.forEach(
-    flavor => {
+          const nameA =
+            a.sabor +
+            (
+              a.is_revenda
+                ? ` — ${a.revendedor || ""}`
+                : ""
+            );
+
+          const nameB =
+            b.sabor +
+            (
+              b.is_revenda
+                ? ` — ${b.revendedor || ""}`
+                : ""
+            );
+
+          return nameA.localeCompare(
+            nameB,
+            "pt-BR"
+          );
+
+        }
+      );
+
+  flavorProducts.forEach(
+    product => {
 
       const option =
         document.createElement(
@@ -1098,14 +1119,20 @@ function populateFlavorSelect(
         );
 
       option.value =
-        flavor;
+        product.id;
 
       option.textContent =
-        flavor;
+        product.sabor +
+        (
+          product.is_revenda
+            ? ` — ${product.revendedor || "Revenda"}`
+            : ""
+        );
 
       select.appendChild(
         option
       );
+
     }
   );
 }
@@ -1172,7 +1199,6 @@ function populateGramsSelect(
 // ======================================================
 // ENCONTRAR PRODUTO DA PRODUÇÃO
 // ======================================================
-
 function getSelectedProductionProduct() {
 
   const type =
@@ -1182,40 +1208,30 @@ function getSelectedProductionProduct() {
     return null;
   }
 
-  if (
-    type === "recheado"
-  ) {
+  if (type === "recheado") {
 
-    const flavor =
-      productionFlavor.value;
+    const productId =
+      Number(productionFlavor.value);
 
-    if (!flavor) {
+    if (!productId) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          product.tipo === "recheado" &&
-          product.sabor === flavor
+          Number(product.id) === productId
       ) || null
     );
   }
 
   const grams =
-    Number(
-      productionGrams.value
-    );
+    Number(productionGrams.value);
 
   const weight =
-    Number(
-      productionWeight.value
-    );
+    Number(productionWeight.value);
 
-  if (
-    !grams ||
-    !weight
-  ) {
+  if (!grams || !weight) {
     return null;
   }
 
@@ -1223,18 +1239,16 @@ function getSelectedProductionProduct() {
     products.find(
       product =>
         product.tipo === type &&
-        product.gramas === grams &&
-        product.peso_kg === weight
+        Number(product.gramas) === grams &&
+        Number(product.peso_kg) === weight
     ) || null
   );
 }
 
-
 // ======================================================
 // ENCONTRAR PRODUTO DA SAÍDA
 // ======================================================
-
-function getSelectedExitProduct() {
+ function getSelectedExitProduct() {
 
   const type =
     exitType.value;
@@ -1243,40 +1257,30 @@ function getSelectedExitProduct() {
     return null;
   }
 
-  if (
-    type === "recheado"
-  ) {
+  if (type === "recheado") {
 
-    const flavor =
-      exitFlavor.value;
+    const productId =
+      Number(exitFlavor.value);
 
-    if (!flavor) {
+    if (!productId) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          product.tipo === "recheado" &&
-          product.sabor === flavor
+          Number(product.id) === productId
       ) || null
     );
   }
 
   const grams =
-    Number(
-      exitGrams.value
-    );
+    Number(exitGrams.value);
 
   const weight =
-    Number(
-      exitWeight.value
-    );
+    Number(exitWeight.value);
 
-  if (
-    !grams ||
-    !weight
-  ) {
+  if (!grams || !weight) {
     return null;
   }
 
@@ -1284,8 +1288,8 @@ function getSelectedExitProduct() {
     products.find(
       product =>
         product.tipo === type &&
-        product.gramas === grams &&
-        product.peso_kg === weight
+        Number(product.gramas) === grams &&
+        Number(product.peso_kg) === weight
     ) || null
   );
 }
