@@ -2753,11 +2753,25 @@ const todayProductions =
   // Quantidade produzida por produto (para o gráfico de pizza).
   const byProduct = {};
 
-  todayProductions.forEach(
-    item => {
+ todayProductions.forEach(
+  item => {
 
-      const raw =
-        item.raw || {};
+    console.log(
+      "RESUMO PRODUÇÃO:",
+      {
+        produto: item.product,
+        quantidade: item.quantity,
+        gramas: item.raw?.gramas,
+        peso_kg: item.raw?.peso_kg,
+        caixas: item.raw?.caixas,
+        unidades_avulsas: item.raw?.unidades_avulsas
+      }
+    );
+
+    const raw =
+      item.raw || {};
+
+    // resto do código...
 
      const gramas =
   Number(
