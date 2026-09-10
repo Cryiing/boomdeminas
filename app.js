@@ -2711,7 +2711,11 @@ const todayProductions =
       ) &&
       isToday(item.date)
   );
-
+console.log("========== RESUMO DO DIA ==========");
+console.log("HISTÓRICO TOTAL:", historyItems);
+console.log("HOJE:", new Date());
+console.log("PRODUÇÕES DE HOJE:", todayProductions);
+console.log("QUANTIDADE DE PRODUÇÕES HOJE:", todayProductions.length);
   if (
     todayProductions.length === 0
   ) {
