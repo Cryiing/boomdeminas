@@ -3606,7 +3606,11 @@ createProductForm.addEventListener(
       Number(
         newProductUnits.value
       );
+const isRevenda =
+  newProductIsRevenda.value === "true";
 
+const revendedor =
+  newProductRevendedor.value.trim();
     if (!tipo) {
 
       showMessage(
@@ -3668,42 +3672,61 @@ createProductForm.addEventListener(
         return;
       }
     }
+if (
+  isRevenda &&
+  !revendedor
+) {
 
+  showMessage(
+    productMessage,
+    "Informe o nome do revendedor.",
+    true
+  );
+
+  return;
+}
     showMessage(
       productMessage,
       "Cadastrando produto..."
     );
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "adicionar_produto",
-        {
-          p_tipo:
-            tipo,
+ const {
+  data,
+  error
+} =
+  await supabaseClient.rpc(
+    "adicionar_produto",
+    {
+      p_tipo:
+        tipo,
 
-          p_sabor:
-            tipo === "recheado"
-              ? sabor
-              : null,
+      p_sabor:
+        tipo === "recheado"
+          ? sabor
+          : null,
 
-          p_gramas:
-            tipo === "recheado"
-              ? null
-              : gramas,
+      p_gramas:
+        tipo === "recheado"
+          ? null
+          : gramas,
 
-          p_peso_kg:
-            tipo === "recheado"
-              ? null
-              : peso,
+      p_peso_kg:
+        tipo === "recheado"
+          ? null
+          : peso,
 
-          p_unidades_por_caixa:
-            unidades
-        }
-      );
+      p_unidades_por_caixa:
+        unidades,
 
+      p_is_revenda:
+        isRevenda,
+
+      p_revendedor:
+        isRevenda
+          ? revendedor
+          : null
+    }
+  );
     if (error) {
 
       console.error(
