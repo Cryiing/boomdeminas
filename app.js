@@ -3753,9 +3753,11 @@ if (
       "Produto cadastrado com sucesso!"
     );
 
-    createProductForm.reset();
+   createProductForm.reset();
 
-    updateAdminProductFields();
+updateAdminProductFields();
+
+updateAdminRevendaField();
 
     await Promise.all([
       loadProducts(),
@@ -3817,7 +3819,29 @@ function updateAdminProductFields() {
   }
 }
 
+function updateAdminRevendaField() {
 
+  const isRevenda =
+    newProductIsRevenda.value === "true";
+
+  newProductRevendedorGroup
+    .classList
+    .toggle(
+      "hidden",
+      !isRevenda
+    );
+
+  if (!isRevenda) {
+
+    newProductRevendedor.value =
+      "";
+
+
+newProductIsRevenda.addEventListener(
+  "change",
+  updateAdminRevendaField
+);
+}
 // ======================================================
 // ADMIN — ATIVAR / DESATIVAR
 // ======================================================
