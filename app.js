@@ -2774,7 +2774,7 @@ console.log("DADOS DO ITEM:", item);
 console.log("RAW:", raw);
     
    const pesoKg =
-  Number(raw.peso_kg || 0);
+  Number(raw.peso_kg || 1);
 
 const caixas =
   Number(raw.caixas || 0);
@@ -2782,23 +2782,9 @@ const caixas =
 const unidadesAvulsas =
   Number(raw.unidades_avulsas || 0);
 
-// Recheados são sempre pacotes de 1 kg.
-const ehRecheado =
-  raw.peso_kg == null &&
-  String(item.product || "")
-    .toLowerCase()
-    .includes("recheado");
-
-const pesoPacote =
-  ehRecheado
-    ? 1
-    : pesoKg;
-
-if (pesoPacote > 0) {
-  totalKg +=
-    pesoPacote *
-    (caixas + unidadesAvulsas);
-}
+totalKg +=
+  pesoKg *
+  (caixas + unidadesAvulsas);
       const hour =
         item.date.getHours();
 
