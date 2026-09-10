@@ -3681,7 +3681,18 @@ if (
       productMessage,
       "Cadastrando produto..."
     );
-
+console.log(
+  "DADOS ENVIADOS PARA ADICIONAR PRODUTO:",
+  {
+    tipo,
+    sabor,
+    gramas,
+    peso,
+    unidades,
+    isRevenda,
+    revendedor
+  }
+);
  const {
   data,
   error
