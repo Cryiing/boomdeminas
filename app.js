@@ -546,6 +546,8 @@ function escapeHtml(value) {
       "&#039;"
     );
 }
+
+
 // ======================================================
 // FORMATAR PRODUTO
 // ======================================================
@@ -558,36 +560,172 @@ function getProductName(
     return "Produto não selecionado";
   }
 
-  let name = "";
-
   if (
     product.tipo ===
     "recheado"
   ) {
 
-    name =
+    return (
       "Recheado — " +
-      (product.sabor || "-");
+      (product.sabor || "-")
+    );
+  }
 
-  } else {
+  return (
+    `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
+    `${product.gramas}g — ` +
+    `${product.peso_kg}kg`
+  );
+}
 
-    name =
-      `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
-      `${product.gramas}g — ` +
-      `${product.peso_kg}kg`;
 
+// ======================================================
+// PERFIL
+// ======================================================
+
+async function loadUserProfile() {
+
+  if (!currentUser) {
+    return false;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "obter_meu_usuario"
+    );
+
+  if (error) {
+
+    console.error(
+      "Erro ao buscar usuário:",
+      error
+    );
+
+    return false;
   }
 
   if (
-    product.is_revenda
+    !data ||
+    data.length === 0
   ) {
 
-    name +=
-      ` — ${product.revendedor || "Revenda"}`;
+    console.error(
+      "Usuário não encontrado."
+    );
 
+    return false;
   }
 
-  return name;
+  currentProfile =
+    data[0];
+
+  console.log(
+    "PERFIL RECEBIDO DO SUPABASE:",
+    currentProfile
+  );
+
+  console.log(
+    "CARGO RECEBIDO:",
+    currentProfile.cargo
+  );
+
+  userRole.classList.remove(
+    "hidden"
+  );
+
+  if (
+    isAdminRole(
+      currentProfile.cargo
+    )
+  ) {
+
+    userRole.textContent =
+      "👑 Administrador";
+
+    adminPanel.classList.remove(
+      "hidden"
+    );
+
+    tabBtnAdmin.classList.remove(
+      "hidden"
+    );
+
+    console.log(
+      "4 - TEXTO DO CARGO NA TELA:",
+      userRole.textContent
+    );
+clearProductionArea.classList.remove(
+    "hidden"
+  );
+
+  editStockToggleBtn?.classList.remove(
+    "hidden"
+  );
+
+    console.log(
+      "5 - ADMIN PANEL ESCONDIDO?",
+      adminPanel.classList.contains(
+        "hidden"
+      )
+    );
+
+  } else {
+
+    userRole.textContent =
+      "👷 Funcionário";
+
+    adminPanel.classList.add(
+      "hidden"
+    );
+
+    tabBtnAdmin.classList.add(
+      "hidden"
+    );
+  
+clearProductionArea.classList.add(
+  "hidden"
+);
+
+  editStockToggleBtn?.classList.add(
+    "hidden"
+  );
+
+  editStockMode = false;
+   }
+  return true;
+}
+
+
+// ======================================================
+// VERIFICAR CARGO
+// ======================================================
+
+function isAdminRole(
+  cargo
+) {
+
+  return (
+    cargo === "admin" ||
+    cargo === "administrador"
+  );
+}
+
+
+// ======================================================
+// ADMIN?
+// ======================================================
+
+function isAdmin() {
+
+  return (
+    currentProfile &&
+    isAdminRole(
+      currentProfile.cargo
+    )
+  );
 }
 
 
@@ -684,7 +822,6 @@ function populateTypeSelect(
       select.appendChild(
         option
       );
-
     }
   );
 }
@@ -740,7 +877,6 @@ function updateProductionFields() {
     );
 
     updateProductionWeights();
-
   }
 
   updateProductionSelectionPreview();
@@ -756,77 +892,55 @@ function updateProductionWeights() {
   const type =
     productionType.value;
 
-  const selectedValue =
-    productionGrams.value;
+  const grams =
+    Number(
+      productionGrams.value
+    );
 
   productionWeight.innerHTML =
     `<option value="">Selecione...</option>`;
 
   if (
     !type ||
-    !selectedValue
+    !grams
   ) {
     return;
   }
 
-  let selectedData;
-
-  try {
-
-    selectedData =
-      JSON.parse(
-        selectedValue
-      );
-
-  } catch {
-
-    return;
-  }
-
   const weights =
-    products
-      .filter(
-        product =>
-          product.tipo === type &&
-          Number(product.gramas) ===
-            Number(selectedData.gramas) &&
-          Boolean(product.is_revenda) ===
-            Boolean(selectedData.is_revenda) &&
-          (
-            !selectedData.is_revenda ||
-            String(
-              product.revendedor || ""
-            ).trim().toLowerCase() ===
-            String(
-              selectedData.revendedor || ""
-            ).trim().toLowerCase()
+    [
+      ...new Set(
+        products
+          .filter(
+            product =>
+              product.tipo === type &&
+              product.gramas === grams
+          )
+          .map(
+            product =>
+              product.peso_kg
           )
       )
-      .sort(
-        (a, b) =>
-          Number(a.peso_kg) -
-          Number(b.peso_kg)
-      );
+    ];
 
   weights.forEach(
-    product => {
+    weight => {
 
       const option =
         document.createElement(
           "option"
         );
 
-      // O valor agora é o ID real do produto
       option.value =
-        product.id;
+        weight;
 
       option.textContent =
-        `${product.peso_kg} kg`;
+        `${weight} kg`;
 
-      productionWeight.appendChild(
-        option
-      );
-
+      productionWeight
+        .appendChild(
+          option
+        );
     }
   );
 }
@@ -882,7 +996,6 @@ function updateExitFields() {
     );
 
     updateExitWeights();
-
   }
 
   updateExitSelectionPreview();
@@ -890,7 +1003,7 @@ function updateExitFields() {
 
 
 // ======================================================
-// ATUALIZAR PESOS DA SAÍDA
+// PESOS DA SAÍDA
 // ======================================================
 
 function updateExitWeights() {
@@ -898,60 +1011,39 @@ function updateExitWeights() {
   const type =
     exitType.value;
 
-  const selectedValue =
-    exitGrams.value;
+  const grams =
+    Number(
+      exitGrams.value
+    );
 
   exitWeight.innerHTML =
     `<option value="">Selecione...</option>`;
 
   if (
     !type ||
-    !selectedValue
+    !grams
   ) {
     return;
   }
 
-  let selectedData;
-
-  try {
-
-    selectedData =
-      JSON.parse(
-        selectedValue
-      );
-
-  } catch {
-
-    return;
-  }
-
   const weights =
-    products
-      .filter(
-        product =>
-          product.tipo === type &&
-          Number(product.gramas) ===
-            Number(selectedData.gramas) &&
-          Boolean(product.is_revenda) ===
-            Boolean(selectedData.is_revenda) &&
-          (
-            !selectedData.is_revenda ||
-            String(
-              product.revendedor || ""
-            ).trim().toLowerCase() ===
-            String(
-              selectedData.revendedor || ""
-            ).trim().toLowerCase()
+    [
+      ...new Set(
+        products
+          .filter(
+            product =>
+              product.tipo === type &&
+              product.gramas === grams
+          )
+          .map(
+            product =>
+              product.peso_kg
           )
       )
-      .sort(
-        (a, b) =>
-          Number(a.peso_kg) -
-          Number(b.peso_kg)
-      );
+    ];
 
   weights.forEach(
-    product => {
+    weight => {
 
       const option =
         document.createElement(
@@ -959,22 +1051,21 @@ function updateExitWeights() {
         );
 
       option.value =
-        product.id;
+        weight;
 
       option.textContent =
-        `${product.peso_kg} kg`;
+        `${weight} kg`;
 
       exitWeight.appendChild(
         option
       );
-
     }
   );
 }
 
 
 // ======================================================
-// SABORES / RECHEADOS
+// SABORES
 // ======================================================
 
 function populateFlavorSelect(
@@ -985,71 +1076,43 @@ function populateFlavorSelect(
   select.innerHTML =
     `<option value="">Selecione...</option>`;
 
-  const flavorProducts =
+  const flavors =
     products
       .filter(
         product =>
-          product.tipo === type &&
+          product.tipo === type
+      )
+      .map(
+        product =>
           product.sabor
       )
-      .sort(
-        (a, b) => {
+      .filter(Boolean)
+      .sort();
 
-          const nameA =
-            a.sabor +
-            (
-              a.is_revenda
-                ? ` — ${a.revendedor || ""}`
-                : ""
-            );
-
-          const nameB =
-            b.sabor +
-            (
-              b.is_revenda
-                ? ` — ${b.revendedor || ""}`
-                : ""
-            );
-
-          return nameA.localeCompare(
-            nameB,
-            "pt-BR"
-          );
-
-        }
-      );
-
-  flavorProducts.forEach(
-    product => {
+  flavors.forEach(
+    flavor => {
 
       const option =
         document.createElement(
           "option"
         );
 
-      // ID real do produto
       option.value =
-        product.id;
+        flavor;
 
       option.textContent =
-        product.sabor +
-        (
-          product.is_revenda
-            ? ` — ${product.revendedor || "Revenda"}`
-            : ""
-        );
+        flavor;
 
       select.appendChild(
         option
       );
-
     }
   );
 }
 
 
 // ======================================================
-// GRAMATURAS / VARIAÇÕES
+// GRAMATURAS
 // ======================================================
 
 function populateGramsSelect(
@@ -1064,135 +1127,44 @@ function populateGramsSelect(
     return;
   }
 
-  const variations = [];
-
-  products
-    .filter(
-      product =>
-        product.tipo === type &&
-        product.gramas
-    )
-    .forEach(
-      product => {
-
-        const key =
-          [
-            Number(
-              product.gramas
-            ),
-
-            Boolean(
-              product.is_revenda
-            ),
-
-            String(
-              product.revendedor || ""
-            )
-              .trim()
-              .toLowerCase()
-          ].join("|");
-
-        if (
-          variations.some(
-            item =>
-              item.key === key
+  const grams =
+    [
+      ...new Set(
+        products
+          .filter(
+            product =>
+              product.tipo === type
           )
-        ) {
-          return;
-        }
+          .map(
+            product =>
+              product.gramas
+          )
+          .filter(Boolean)
+          .sort(
+            (a, b) =>
+              a - b
+          )
+      )
+    ];
 
-        variations.push({
-          key,
-          product
-        });
+  grams.forEach(
+    gram => {
 
-      }
-    );
-
-  variations
-    .sort(
-      (a, b) => {
-
-        const gramsA =
-          Number(
-            a.product.gramas
-          );
-
-        const gramsB =
-          Number(
-            b.product.gramas
-          );
-
-        if (
-          gramsA !==
-          gramsB
-        ) {
-
-          return (
-            gramsA -
-            gramsB
-          );
-
-        }
-
-        const nameA =
-          a.product.revendedor ||
-          "";
-
-        const nameB =
-          b.product.revendedor ||
-          "";
-
-        return nameA.localeCompare(
-          nameB,
-          "pt-BR"
+      const option =
+        document.createElement(
+          "option"
         );
 
-      }
-    )
-    .forEach(
-      item => {
+      option.value =
+        gram;
 
-        const product =
-          item.product;
+      option.textContent =
+        `${gram}g`;
 
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        // Guardamos a variação inteira
-        // para não confundir produtos iguais
-        option.value =
-          JSON.stringify({
-            gramas:
-              Number(
-                product.gramas
-              ),
-
-            is_revenda:
-              Boolean(
-                product.is_revenda
-              ),
-
-            revendedor:
-              product.revendedor ||
-              ""
-          });
-
-        option.textContent =
-          `${product.gramas}g` +
-          (
-            product.is_revenda
-              ? ` — ${product.revendedor || "Revenda"}`
-              : ""
-          );
-
-        select.appendChild(
-          option
-        );
-
-      }
+      select.appendChild(
+        option
+      );
+    }
   );
 }
 
@@ -1210,47 +1182,49 @@ function getSelectedProductionProduct() {
     return null;
   }
 
-  // Recheado usa diretamente o ID
   if (
     type === "recheado"
   ) {
 
-    const productId =
-      Number(
-        productionFlavor.value
-      );
+    const flavor =
+      productionFlavor.value;
 
-    if (!productId) {
+    if (!flavor) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          Number(
-            product.id
-          ) === productId
+          product.tipo === "recheado" &&
+          product.sabor === flavor
       ) || null
     );
   }
 
-  // Produtos normais usam o ID
-  // selecionado no campo de peso
-  const productId =
+  const grams =
+    Number(
+      productionGrams.value
+    );
+
+  const weight =
     Number(
       productionWeight.value
     );
 
-  if (!productId) {
+  if (
+    !grams ||
+    !weight
+  ) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        Number(
-          product.id
-        ) === productId
+        product.tipo === type &&
+        product.gramas === grams &&
+        product.peso_kg === weight
     ) || null
   );
 }
@@ -1269,52 +1243,77 @@ function getSelectedExitProduct() {
     return null;
   }
 
-  // Recheado usa diretamente o ID
   if (
     type === "recheado"
   ) {
 
-    const productId =
-      Number(
-        exitFlavor.value
-      );
+    const flavor =
+      exitFlavor.value;
 
-    if (!productId) {
+    if (!flavor) {
       return null;
     }
 
     return (
       products.find(
         product =>
-          Number(
-            product.id
-          ) === productId
+          product.tipo === "recheado" &&
+          product.sabor === flavor
       ) || null
     );
   }
 
-  // Produtos normais usam o ID
-  // selecionado no campo de peso
-  const productId =
+  const grams =
+    Number(
+      exitGrams.value
+    );
+
+  const weight =
     Number(
       exitWeight.value
     );
 
-  if (!productId) {
+  if (
+    !grams ||
+    !weight
+  ) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        Number(
-          product.id
-        ) === productId
+        product.tipo === type &&
+        product.gramas === grams &&
+        product.peso_kg === weight
     ) || null
   );
 }
 
-// ==============================================
+
+// ======================================================
+// PREVIEW PRODUÇÃO
+// ======================================================
+
+function updateProductionSelectionPreview() {
+
+  const product =
+    getSelectedProductionProduct();
+
+  if (!product) {
+
+    productionProductPreview.textContent =
+      "Selecione o produto";
+
+    return;
+  }
+
+  productionProductPreview.textContent =
+    getProductName(product);
+}
+
+
+// ======================================================
 // PREVIEW SAÍDA
 // ======================================================
 
