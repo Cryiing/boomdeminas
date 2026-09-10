@@ -3818,7 +3818,7 @@ function updateAdminProductFields() {
     }
   }
 }
-function updateAdminRevendaField() {
+ function updateAdminRevendaField() {
 
   const isRevenda =
     newProductIsRevenda.value === "true";
