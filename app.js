@@ -2772,9 +2772,9 @@ const todayProductions =
       item.raw || {};
 
      const pesoKg =
-  Number(
-    raw.peso_kg || 0
-  );
+  raw.tipo === "recheado"
+    ? 1
+    : Number(raw.peso_kg || 0);
 
 const caixas =
   Number(
