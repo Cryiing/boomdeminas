@@ -1047,24 +1047,21 @@ function updateExitWeights() {
     return;
   }
 
-  const weights =
-    [
-      ...new Set(
-        products
-          .filter(
-            product =>
-              product.tipo === type &&
-              product.gramas === grams
-          )
-          .map(
-            product =>
-              product.peso_kg
-          )
+  const weightProducts =
+    products
+      .filter(
+        product =>
+          product.tipo === type &&
+          Number(product.gramas) === grams
       )
-    ];
+      .sort(
+        (a, b) =>
+          Number(a.peso_kg) -
+          Number(b.peso_kg)
+      );
 
-  weights.forEach(
-    weight => {
+  weightProducts.forEach(
+    product => {
 
       const option =
         document.createElement(
@@ -1072,14 +1069,29 @@ function updateExitWeights() {
         );
 
       option.value =
-        weight;
+        product.id;
+
+      let texto =
+        `${product.peso_kg} kg`;
+
+      if (
+        product.is_revenda &&
+        product.revendedor
+      ) {
+        texto +=
+          ` — Revenda: ${product.revendedor}`;
+      } else {
+        texto +=
+          ` — Normal`;
+      }
 
       option.textContent =
-        `${weight} kg`;
+        texto;
 
       exitWeight.appendChild(
         option
       );
+
     }
   );
 }
@@ -1257,7 +1269,7 @@ function getSelectedProductionProduct() {
 // ======================================================
 // ENCONTRAR PRODUTO DA SAÍDA
 // ======================================================
- function getSelectedExitProduct() {
+function getSelectedExitProduct() {
 
   const type =
     exitType.value;
@@ -1269,7 +1281,9 @@ function getSelectedProductionProduct() {
   if (type === "recheado") {
 
     const productId =
-      Number(exitFlavor.value);
+      Number(
+        exitFlavor.value
+      );
 
     if (!productId) {
       return null;
@@ -1278,31 +1292,29 @@ function getSelectedProductionProduct() {
     return (
       products.find(
         product =>
-          Number(product.id) === productId
+          Number(product.id) ===
+          productId
       ) || null
     );
   }
 
-  const grams =
-    Number(exitGrams.value);
+  const productId =
+    Number(
+      exitWeight.value
+    );
 
-  const weight =
-    Number(exitWeight.value);
-
-  if (!grams || !weight) {
+  if (!productId) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        product.tipo === type &&
-        Number(product.gramas) === grams &&
-        Number(product.peso_kg) === weight
+        Number(product.id) ===
+        productId
     ) || null
   );
 }
-
 
 // ======================================================
 // PREVIEW PRODUÇÃO
