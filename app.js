@@ -917,24 +917,21 @@ function updateProductionWeights() {
     return;
   }
 
-  const weights =
-    [
-      ...new Set(
-        products
-          .filter(
-            product =>
-              product.tipo === type &&
-              product.gramas === grams
-          )
-          .map(
-            product =>
-              product.peso_kg
-          )
+  const weightProducts =
+    products
+      .filter(
+        product =>
+          product.tipo === type &&
+          Number(product.gramas) === grams
       )
-    ];
+      .sort(
+        (a, b) =>
+          Number(a.peso_kg) -
+          Number(b.peso_kg)
+      );
 
-  weights.forEach(
-    weight => {
+  weightProducts.forEach(
+    product => {
 
       const option =
         document.createElement(
@@ -942,15 +939,29 @@ function updateProductionWeights() {
         );
 
       option.value =
-        weight;
+        product.id;
+
+      let texto =
+        `${product.peso_kg} kg`;
+
+      if (
+        product.is_revenda &&
+        product.revendedor
+      ) {
+        texto +=
+          ` — Revenda: ${product.revendedor}`;
+      } else {
+        texto +=
+          ` — Normal`;
+      }
 
       option.textContent =
-        `${weight} kg`;
+        texto;
 
-      productionWeight
-        .appendChild(
-          option
-        );
+      productionWeight.appendChild(
+        option
+      );
+
     }
   );
 }
@@ -1140,11 +1151,11 @@ function populateFlavorSelect(
 // GRAMATURAS
 // ======================================================
 
+
 function populateGramsSelect(
   select,
   type
 ) {
-
   select.innerHTML =
     `<option value="">Selecione...</option>`;
 
@@ -1174,7 +1185,6 @@ function populateGramsSelect(
 
   grams.forEach(
     gram => {
-
       const option =
         document.createElement(
           "option"
