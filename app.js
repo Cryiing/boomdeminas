@@ -3836,6 +3836,15 @@ function updateAdminRevendaField() {
     newProductRevendedor.value =
       "";
 
+  }
+
+}
+
+
+newProductIsRevenda.addEventListener(
+  "change",
+  updateAdminRevendaField
+);
 
 newProductIsRevenda.addEventListener(
   "change",
