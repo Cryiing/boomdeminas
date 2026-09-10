@@ -2756,17 +2756,7 @@ const todayProductions =
  todayProductions.forEach(
   item => {
 
-    console.log(
-      "RESUMO PRODUÇÃO:",
-      {
-        produto: item.product,
-        quantidade: item.quantity,
-        gramas: item.raw?.gramas,
-        peso_kg: item.raw?.peso_kg,
-        caixas: item.raw?.caixas,
-        unidades_avulsas: item.raw?.unidades_avulsas
-      }
-    );
+
 
     const raw =
       item.raw || {};
