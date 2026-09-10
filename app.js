@@ -129,7 +129,20 @@ const newProductUnits =
   document.getElementById(
     "newProductUnits"
   );
+const newProductIsRevenda =
+  document.getElementById(
+    "newProductIsRevenda"
+  );
 
+const newProductRevendedorGroup =
+  document.getElementById(
+    "newProductRevendedorGroup"
+  );
+
+const newProductRevendedor =
+  document.getElementById(
+    "newProductRevendedor"
+  );
 const productMessage =
   document.getElementById(
     "productMessage"
