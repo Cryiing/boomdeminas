@@ -3419,7 +3419,7 @@ function renderAdminProducts(
             product.tipo ===
             "recheado";
 
-          let produto = "";
+          let produto;
 
           if (isRecheado) {
 
@@ -3428,21 +3428,29 @@ function renderAdminProducts(
 
           } else {
 
-            produto =
-              "-";
+            produto = "-";
+
           }
 
           /*
-           * Se for produto de revenda,
-           * mostra o revendedor junto.
+           * Produto de revenda
            */
           if (
             product.is_revenda &&
             product.revendedor
           ) {
 
-            produto +=
-              ` — Revenda: ${product.revendedor}`;
+            if (produto === "-") {
+
+              produto =
+                `Revenda: ${product.revendedor}`;
+
+            } else {
+
+              produto +=
+                ` — Revenda: ${product.revendedor}`;
+
+            }
 
           }
 
