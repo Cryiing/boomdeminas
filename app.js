@@ -2688,7 +2688,8 @@ if (
   !dailySummaryRate ||
   !dailySummaryTop
 ) {
-  return;
+  return; 
+  }
 
   const today =
     new Date();
