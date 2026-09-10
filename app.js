@@ -3819,7 +3819,7 @@ function updateAdminProductFields() {
     }
   }
 }
-function updateAdminRevendaField() {
+ function updateAdminRevendaField() {
 
   const isRevenda =
     newProductIsRevenda.value === "true";
@@ -3845,7 +3845,6 @@ newProductIsRevenda.addEventListener(
   "change",
   updateAdminRevendaField
 );
-
 
 // ======================================================
 // ADMIN — ATIVAR / DESATIVAR
