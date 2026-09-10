@@ -3419,10 +3419,32 @@ function renderAdminProducts(
             product.tipo ===
             "recheado";
 
-          const produto =
-            isRecheado
-              ? product.sabor
-              : "-";
+          let produto = "";
+
+          if (isRecheado) {
+
+            produto =
+              product.sabor || "-";
+
+          } else {
+
+            produto =
+              "-";
+          }
+
+          /*
+           * Se for produto de revenda,
+           * mostra o revendedor junto.
+           */
+          if (
+            product.is_revenda &&
+            product.revendedor
+          ) {
+
+            produto +=
+              ` — Revenda: ${product.revendedor}`;
+
+          }
 
           const grams =
             isRecheado
@@ -3565,7 +3587,6 @@ function renderAdminProducts(
       }
     );
 }
-
 
 // ======================================================
 // ADMIN — CRIAR PRODUTO
