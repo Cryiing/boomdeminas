@@ -3846,6 +3846,12 @@ newProductIsRevenda.addEventListener(
   updateAdminRevendaField
 );
 
+
+newProductIsRevenda.addEventListener(
+  "change",
+  updateAdminRevendaField
+);
+
 // ======================================================
 // ADMIN — ATIVAR / DESATIVAR
 // ======================================================
