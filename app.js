@@ -2771,15 +2771,19 @@ const todayProductions =
     const raw =
       item.raw || {};
 
-     const gramas =
+     const pesoKg =
   Number(
-    raw.gramas || 0
+    raw.peso_kg || 0
   );
 
-if (gramas > 0) {
+const caixas =
+  Number(
+    raw.caixas || 0
+  );
+
+if (pesoKg > 0 && caixas > 0) {
   totalKg +=
-    (gramas / 1000) *
-    item.quantity;
+    pesoKg * caixas;
 }
       const hour =
         item.date.getHours();
