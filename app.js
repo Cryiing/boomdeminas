@@ -560,22 +560,32 @@ function getProductName(
     return "Produto não selecionado";
   }
 
-  if (
-    product.tipo ===
-    "recheado"
-  ) {
+  let nome = "";
 
-    return (
+  if (product.tipo === "recheado") {
+
+    nome =
       "Recheado — " +
-      (product.sabor || "-")
-    );
+      (product.sabor || "-");
+
+  } else {
+
+    nome =
+      `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
+      `${product.gramas}g — ` +
+      `${product.peso_kg}kg`;
   }
 
-  return (
-    `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
-    `${product.gramas}g — ` +
-    `${product.peso_kg}kg`
-  );
+  if (
+    product.is_revenda &&
+    product.revendedor
+  ) {
+
+    nome +=
+      ` — ${product.revendedor}`;
+  }
+
+  return nome;
 }
 
 
