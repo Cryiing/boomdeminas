@@ -1080,34 +1080,17 @@ function populateFlavorSelect(
     products
       .filter(
         product =>
-          product.tipo === type &&
+          product.tipo === type
+      )
+      .filter(
+        product =>
           product.sabor
       )
       .sort(
-        (a, b) => {
-
-          const nameA =
-            a.sabor +
-            (
-              a.is_revenda
-                ? ` — ${a.revendedor || ""}`
-                : ""
-            );
-
-          const nameB =
-            b.sabor +
-            (
-              b.is_revenda
-                ? ` — ${b.revendedor || ""}`
-                : ""
-            );
-
-          return nameA.localeCompare(
-            nameB,
-            "pt-BR"
-          );
-
-        }
+        (a, b) =>
+          a.sabor.localeCompare(
+            b.sabor
+          )
       );
 
   flavorProducts.forEach(
@@ -1121,22 +1104,27 @@ function populateFlavorSelect(
       option.value =
         product.id;
 
-      option.textContent =
-        product.sabor +
-        (
-          product.is_revenda
-            ? ` — ${product.revendedor || "Revenda"}`
-            : ""
-        );
+      if (
+        product.is_revenda &&
+        product.revendedor
+      ) {
+
+        option.textContent =
+          `${product.sabor} — ${product.revendedor}`;
+
+      } else {
+
+        option.textContent =
+          product.sabor;
+
+      }
 
       select.appendChild(
         option
       );
-
     }
   );
 }
-
 
 // ======================================================
 // GRAMATURAS
