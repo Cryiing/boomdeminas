@@ -2820,10 +2820,6 @@ const kgAvulsas =
 totalKg +=
   kgCaixas +
   kgAvulsas;
-
-totalKg +=
-  pesoKg *
-  (caixas + unidadesAvulsas);
       const hour =
         item.date.getHours();
 
