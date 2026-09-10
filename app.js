@@ -2759,18 +2759,16 @@ const todayProductions =
       const raw =
         item.raw || {};
 
-      const pesoKg =
-        Number(
-          raw.peso_kg || 0
-        );
+     const gramas =
+  Number(
+    raw.gramas || 0
+  );
 
-      if (pesoKg > 0) {
-
-        totalKg +=
-          pesoKg *
-          item.quantity;
-      }
-
+if (gramas > 0) {
+  totalKg +=
+    (gramas / 1000) *
+    item.quantity;
+}
       const hour =
         item.date.getHours();
 
