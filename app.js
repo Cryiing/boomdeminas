@@ -1820,13 +1820,17 @@ function renderDailySummary() {
       date.getMonth() === today.getMonth() &&
       date.getDate() === today.getDate();
 
-  // Só produção "nossa" (não conta revenda nem saídas).
-  const todayProductions =
-    historyItems.filter(
-      item =>
-        item.kind === "producao" &&
-        isToday(item.date)
-    );
+  // Produção do dia: inclui produção normal e produção para revenda.
+// Saídas não entram no resumo.
+const todayProductions =
+  historyItems.filter(
+    item =>
+      (
+        item.kind === "producao" ||
+        item.kind === "revenda"
+      ) &&
+      isToday(item.date)
+  );
 
   if (
     todayProductions.length === 0
