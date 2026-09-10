@@ -2772,6 +2772,7 @@ const todayProductions =
       item.raw || {};
 console.log("DADOS DO ITEM:", item);
 console.log("RAW:", raw);
+    
    const pesoKg =
   Number(raw.peso_kg || 0);
 
@@ -2781,24 +2782,22 @@ const caixas =
 const unidadesAvulsas =
   Number(raw.unidades_avulsas || 0);
 
-const tipo =
-  String(raw.tipo || "").toLowerCase();
+// Recheados são sempre pacotes de 1 kg.
+const ehRecheado =
+  raw.peso_kg == null &&
+  String(item.product || "")
+    .toLowerCase()
+    .includes("recheado");
 
-if (tipo === "recheado") {
+const pesoPacote =
+  ehRecheado
+    ? 1
+    : pesoKg;
 
-  // Cada unidade de Recheado representa 1 pacote de 1 kg.
+if (pesoPacote > 0) {
   totalKg +=
-    caixas * 1;
-
-  totalKg +=
-    unidadesAvulsas * 1;
-
-} else if (pesoKg > 0) {
-
-  // Produtos normais: cada caixa/pacote
-  // vale o peso definido (1 kg ou 2 kg).
-  totalKg +=
-    pesoKg * caixas;
+    pesoPacote *
+    (caixas + unidadesAvulsas);
 }
       const hour =
         item.date.getHours();
