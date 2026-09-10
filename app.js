@@ -2770,7 +2770,8 @@ const todayProductions =
 
     const raw =
       item.raw || {};
-
+console.log("DADOS DO ITEM:", item);
+console.log("RAW:", raw);
    const pesoKg =
   Number(raw.peso_kg || 0);
 
