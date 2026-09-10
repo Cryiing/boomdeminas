@@ -2684,11 +2684,11 @@ createPedidoForm?.addEventListener(
 
 function renderDailySummary() {
 
-  if (
-    !dailySummaryKg
-  ) {
-    return;
-  }
+if (
+  !dailySummaryRate ||
+  !dailySummaryTop
+) {
+  return;
 
   const today =
     new Date();
@@ -2715,9 +2715,7 @@ const todayProductions =
     todayProductions.length === 0
   ) {
 
-    dailySummaryKg.textContent =
-      "0 kg";
-
+    
     dailySummaryRate.textContent =
       "0";
 
@@ -2836,11 +2834,6 @@ totalKg +=
     }
   );
 
-  dailySummaryKg.textContent =
-    `${totalKg.toLocaleString(
-      "pt-BR",
-      { maximumFractionDigits: 1 }
-    )} kg`;
 
   // Média de pacotes por hora com produção registrada.
   const hoursWithProduction =
