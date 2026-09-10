@@ -546,8 +546,6 @@ function escapeHtml(value) {
       "&#039;"
     );
 }
-
-
 // ======================================================
 // FORMATAR PRODUTO
 // ======================================================
@@ -560,172 +558,36 @@ function getProductName(
     return "Produto não selecionado";
   }
 
+  let name = "";
+
   if (
     product.tipo ===
     "recheado"
   ) {
 
-    return (
+    name =
       "Recheado — " +
-      (product.sabor || "-")
-    );
-  }
-
-  return (
-    `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
-    `${product.gramas}g — ` +
-    `${product.peso_kg}kg`
-  );
-}
-
-
-// ======================================================
-// PERFIL
-// ======================================================
-
-async function loadUserProfile() {
-
-  if (!currentUser) {
-    return false;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.rpc(
-      "obter_meu_usuario"
-    );
-
-  if (error) {
-
-    console.error(
-      "Erro ao buscar usuário:",
-      error
-    );
-
-    return false;
-  }
-
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    console.error(
-      "Usuário não encontrado."
-    );
-
-    return false;
-  }
-
-  currentProfile =
-    data[0];
-
-  console.log(
-    "PERFIL RECEBIDO DO SUPABASE:",
-    currentProfile
-  );
-
-  console.log(
-    "CARGO RECEBIDO:",
-    currentProfile.cargo
-  );
-
-  userRole.classList.remove(
-    "hidden"
-  );
-
-  if (
-    isAdminRole(
-      currentProfile.cargo
-    )
-  ) {
-
-    userRole.textContent =
-      "👑 Administrador";
-
-    adminPanel.classList.remove(
-      "hidden"
-    );
-
-    tabBtnAdmin.classList.remove(
-      "hidden"
-    );
-
-    console.log(
-      "4 - TEXTO DO CARGO NA TELA:",
-      userRole.textContent
-    );
-clearProductionArea.classList.remove(
-    "hidden"
-  );
-
-  editStockToggleBtn?.classList.remove(
-    "hidden"
-  );
-
-    console.log(
-      "5 - ADMIN PANEL ESCONDIDO?",
-      adminPanel.classList.contains(
-        "hidden"
-      )
-    );
+      (product.sabor || "-");
 
   } else {
 
-    userRole.textContent =
-      "👷 Funcionário";
+    name =
+      `${TYPE_NAMES[product.tipo] || product.tipo} — ` +
+      `${product.gramas}g — ` +
+      `${product.peso_kg}kg`;
 
-    adminPanel.classList.add(
-      "hidden"
-    );
+  }
 
-    tabBtnAdmin.classList.add(
-      "hidden"
-    );
-  
-clearProductionArea.classList.add(
-  "hidden"
-);
+  if (
+    product.is_revenda
+  ) {
 
-  editStockToggleBtn?.classList.add(
-    "hidden"
-  );
+    name +=
+      ` — ${product.revendedor || "Revenda"}`;
 
-  editStockMode = false;
-   }
-  return true;
-}
+  }
 
-
-// ======================================================
-// VERIFICAR CARGO
-// ======================================================
-
-function isAdminRole(
-  cargo
-) {
-
-  return (
-    cargo === "admin" ||
-    cargo === "administrador"
-  );
-}
-
-
-// ======================================================
-// ADMIN?
-// ======================================================
-
-function isAdmin() {
-
-  return (
-    currentProfile &&
-    isAdminRole(
-      currentProfile.cargo
-    )
-  );
+  return name;
 }
 
 
@@ -822,6 +684,7 @@ function populateTypeSelect(
       select.appendChild(
         option
       );
+
     }
   );
 }
@@ -877,6 +740,7 @@ function updateProductionFields() {
     );
 
     updateProductionWeights();
+
   }
 
   updateProductionSelectionPreview();
@@ -892,55 +756,77 @@ function updateProductionWeights() {
   const type =
     productionType.value;
 
-  const grams =
-    Number(
-      productionGrams.value
-    );
+  const selectedValue =
+    productionGrams.value;
 
   productionWeight.innerHTML =
     `<option value="">Selecione...</option>`;
 
   if (
     !type ||
-    !grams
+    !selectedValue
   ) {
     return;
   }
 
+  let selectedData;
+
+  try {
+
+    selectedData =
+      JSON.parse(
+        selectedValue
+      );
+
+  } catch {
+
+    return;
+  }
+
   const weights =
-    [
-      ...new Set(
-        products
-          .filter(
-            product =>
-              product.tipo === type &&
-              product.gramas === grams
-          )
-          .map(
-            product =>
-              product.peso_kg
+    products
+      .filter(
+        product =>
+          product.tipo === type &&
+          Number(product.gramas) ===
+            Number(selectedData.gramas) &&
+          Boolean(product.is_revenda) ===
+            Boolean(selectedData.is_revenda) &&
+          (
+            !selectedData.is_revenda ||
+            String(
+              product.revendedor || ""
+            ).trim().toLowerCase() ===
+            String(
+              selectedData.revendedor || ""
+            ).trim().toLowerCase()
           )
       )
-    ];
+      .sort(
+        (a, b) =>
+          Number(a.peso_kg) -
+          Number(b.peso_kg)
+      );
 
   weights.forEach(
-    weight => {
+    product => {
 
       const option =
         document.createElement(
           "option"
         );
 
+      // O valor agora é o ID real do produto
       option.value =
-        weight;
+        product.id;
 
       option.textContent =
-        `${weight} kg`;
+        `${product.peso_kg} kg`;
 
-      productionWeight
-        .appendChild(
-          option
-        );
+      productionWeight.appendChild(
+        option
+      );
+
     }
   );
 }
@@ -996,6 +882,7 @@ function updateExitFields() {
     );
 
     updateExitWeights();
+
   }
 
   updateExitSelectionPreview();
@@ -1003,7 +890,7 @@ function updateExitFields() {
 
 
 // ======================================================
-// PESOS DA SAÍDA
+// ATUALIZAR PESOS DA SAÍDA
 // ======================================================
 
 function updateExitWeights() {
@@ -1011,39 +898,60 @@ function updateExitWeights() {
   const type =
     exitType.value;
 
-  const grams =
-    Number(
-      exitGrams.value
-    );
+  const selectedValue =
+    exitGrams.value;
 
   exitWeight.innerHTML =
     `<option value="">Selecione...</option>`;
 
   if (
     !type ||
-    !grams
+    !selectedValue
   ) {
     return;
   }
 
+  let selectedData;
+
+  try {
+
+    selectedData =
+      JSON.parse(
+        selectedValue
+      );
+
+  } catch {
+
+    return;
+  }
+
   const weights =
-    [
-      ...new Set(
-        products
-          .filter(
-            product =>
-              product.tipo === type &&
-              product.gramas === grams
-          )
-          .map(
-            product =>
-              product.peso_kg
+    products
+      .filter(
+        product =>
+          product.tipo === type &&
+          Number(product.gramas) ===
+            Number(selectedData.gramas) &&
+          Boolean(product.is_revenda) ===
+            Boolean(selectedData.is_revenda) &&
+          (
+            !selectedData.is_revenda ||
+            String(
+              product.revendedor || ""
+            ).trim().toLowerCase() ===
+            String(
+              selectedData.revendedor || ""
+            ).trim().toLowerCase()
           )
       )
-    ];
+      .sort(
+        (a, b) =>
+          Number(a.peso_kg) -
+          Number(b.peso_kg)
+      );
 
   weights.forEach(
-    weight => {
+    product => {
 
       const option =
         document.createElement(
@@ -1051,21 +959,22 @@ function updateExitWeights() {
         );
 
       option.value =
-        weight;
+        product.id;
 
       option.textContent =
-        `${weight} kg`;
+        `${product.peso_kg} kg`;
 
       exitWeight.appendChild(
         option
       );
+
     }
   );
 }
 
 
 // ======================================================
-// SABORES
+// SABORES / RECHEADOS
 // ======================================================
 
 function populateFlavorSelect(
@@ -1080,10 +989,7 @@ function populateFlavorSelect(
     products
       .filter(
         product =>
-          product.tipo === type
-      )
-      .filter(
-        product =>
+          product.tipo === type &&
           product.sabor
       )
       .sort(
@@ -1121,7 +1027,7 @@ function populateFlavorSelect(
           "option"
         );
 
-      // Guarda o ID real do produto
+      // ID real do produto
       option.value =
         product.id;
 
@@ -1129,7 +1035,7 @@ function populateFlavorSelect(
         product.sabor +
         (
           product.is_revenda
-            ? ` — ${product.revendedor || ""}`
+            ? ` — ${product.revendedor || "Revenda"}`
             : ""
         );
 
@@ -1143,7 +1049,7 @@ function populateFlavorSelect(
 
 
 // ======================================================
-// GRAMATURAS
+// GRAMATURAS / VARIAÇÕES
 // ======================================================
 
 function populateGramsSelect(
@@ -1158,44 +1064,135 @@ function populateGramsSelect(
     return;
   }
 
-  const grams =
-    [
-      ...new Set(
-        products
-          .filter(
-            product =>
-              product.tipo === type
-          )
-          .map(
-            product =>
+  const variations = [];
+
+  products
+    .filter(
+      product =>
+        product.tipo === type &&
+        product.gramas
+    )
+    .forEach(
+      product => {
+
+        const key =
+          [
+            Number(
               product.gramas
-          )
-          .filter(Boolean)
-          .sort(
-            (a, b) =>
-              a - b
-          )
-      )
-    ];
+            ),
 
-  grams.forEach(
-    gram => {
+            Boolean(
+              product.is_revenda
+            ),
 
-      const option =
-        document.createElement(
-          "option"
+            String(
+              product.revendedor || ""
+            )
+              .trim()
+              .toLowerCase()
+          ].join("|");
+
+        if (
+          variations.some(
+            item =>
+              item.key === key
+          )
+        ) {
+          return;
+        }
+
+        variations.push({
+          key,
+          product
+        });
+
+      }
+    );
+
+  variations
+    .sort(
+      (a, b) => {
+
+        const gramsA =
+          Number(
+            a.product.gramas
+          );
+
+        const gramsB =
+          Number(
+            b.product.gramas
+          );
+
+        if (
+          gramsA !==
+          gramsB
+        ) {
+
+          return (
+            gramsA -
+            gramsB
+          );
+
+        }
+
+        const nameA =
+          a.product.revendedor ||
+          "";
+
+        const nameB =
+          b.product.revendedor ||
+          "";
+
+        return nameA.localeCompare(
+          nameB,
+          "pt-BR"
         );
 
-      option.value =
-        gram;
+      }
+    )
+    .forEach(
+      item => {
 
-      option.textContent =
-        `${gram}g`;
+        const product =
+          item.product;
 
-      select.appendChild(
-        option
-      );
-    }
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        // Guardamos a variação inteira
+        // para não confundir produtos iguais
+        option.value =
+          JSON.stringify({
+            gramas:
+              Number(
+                product.gramas
+              ),
+
+            is_revenda:
+              Boolean(
+                product.is_revenda
+              ),
+
+            revendedor:
+              product.revendedor ||
+              ""
+          });
+
+        option.textContent =
+          `${product.gramas}g` +
+          (
+            product.is_revenda
+              ? ` — ${product.revendedor || "Revenda"}`
+              : ""
+          );
+
+        select.appendChild(
+          option
+        );
+
+      }
   );
 }
 
@@ -1213,6 +1210,7 @@ function getSelectedProductionProduct() {
     return null;
   }
 
+  // Recheado usa diretamente o ID
   if (
     type === "recheado"
   ) {
@@ -1229,35 +1227,30 @@ function getSelectedProductionProduct() {
     return (
       products.find(
         product =>
-          Number(product.id) ===
-          productId
+          Number(
+            product.id
+          ) === productId
       ) || null
     );
   }
 
-  const grams =
-    Number(
-      productionGrams.value
-    );
-
-  const weight =
+  // Produtos normais usam o ID
+  // selecionado no campo de peso
+  const productId =
     Number(
       productionWeight.value
     );
 
-  if (
-    !grams ||
-    !weight
-  ) {
+  if (!productId) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        product.tipo === type &&
-        product.gramas === grams &&
-        product.peso_kg === weight
+        Number(
+          product.id
+        ) === productId
     ) || null
   );
 }
@@ -1276,6 +1269,7 @@ function getSelectedExitProduct() {
     return null;
   }
 
+  // Recheado usa diretamente o ID
   if (
     type === "recheado"
   ) {
@@ -1292,62 +1286,35 @@ function getSelectedExitProduct() {
     return (
       products.find(
         product =>
-          Number(product.id) ===
-          productId
+          Number(
+            product.id
+          ) === productId
       ) || null
     );
   }
 
-  const grams =
-    Number(
-      exitGrams.value
-    );
-
-  const weight =
+  // Produtos normais usam o ID
+  // selecionado no campo de peso
+  const productId =
     Number(
       exitWeight.value
     );
 
-  if (
-    !grams ||
-    !weight
-  ) {
+  if (!productId) {
     return null;
   }
 
   return (
     products.find(
       product =>
-        product.tipo === type &&
-        product.gramas === grams &&
-        product.peso_kg === weight
+        Number(
+          product.id
+        ) === productId
     ) || null
   );
 }
 
-// ======================================================
-// PREVIEW PRODUÇÃO
-// ======================================================
-
-function updateProductionSelectionPreview() {
-
-  const product =
-    getSelectedProductionProduct();
-
-  if (!product) {
-
-    productionProductPreview.textContent =
-      "Selecione o produto";
-
-    return;
-  }
-
-  productionProductPreview.textContent =
-    getProductName(product);
-}
-
-
-// ======================================================
+// ==============================================
 // PREVIEW SAÍDA
 // ======================================================
 
